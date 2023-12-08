@@ -1,0 +1,51 @@
+﻿@page "/gweather"
+@inject WeatherForecasts.WeatherForecastsClient client
+@using Google.Protobuf.WellKnownTypes
+@using GrpcBackend
+@attribute [StreamRendering]
+
+<PageTitle>Weather GRPC</PageTitle>
+
+<h1>Weather GRPC</h1>
+
+<p>This component demonstrates showing data.</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToDateTime().ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@(32 + (int)(@forecast.TemperatureC / 0.5556))</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IList<WeatherForecast>? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = (await client.GetWeatherForecastsAsync(new Empty())).Forecasts;
+    }
+
+   
+}
